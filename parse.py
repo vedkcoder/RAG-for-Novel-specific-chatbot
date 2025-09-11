@@ -3,8 +3,13 @@ import PyPDF2 as pdf
 import re
 import nltk
 from nltk.tokenize import word_tokenize
-nltk.download('punkt_tab')
-from textblob import TextBlob
+# nltk.download('punkt_tab')
+# from textblob import TextBlob
+# from huggingface_hub import login
+from langchain_huggingface.embeddings import HuggingFaceEmbeddings
+# login(token=os.environ.get('hf_token'))
+import numpy as np
+import pandas as pd
 
 
 def read_pdf(filepath):
@@ -47,8 +52,31 @@ def clean_text(text):
 
 def chunk_text(text, chunk_size):
     words = text.split()
-    print(len(words))
+    # print(len(words))
     return [' '.join(words[i:i + chunk_size]) for i in range(0, len(words), chunk_size)]
+
+def embed(model_name, batch_size, chunks):
+    
+    embeddings = HuggingFaceEmbeddings(model_name = model_name)
+
+    all_outputs = []
+    for i in range(0,len(chunks), batch_size):
+    
+        batch = chunks[i:i+batch_size]
+        outputs = embeddings.embed_query(str(batch))
+        # batch_outputs = np.mean(outputs, axis=1)
+        all_outputs.append(outputs)
+
+    # print(len(all_outputs))
+    return np.array(all_outputs)
+
+def save_embeddings(embeddings):
+
+    df = pd.DataFrame(embeddings)
+    df.to_csv('embeddings.csv')
+    print('Succesfully saved embeddings')
+
+
 
 def run():
 
@@ -56,5 +84,11 @@ def run():
     text = read_pdf(filepath)
     cleaned_text = clean_text(text)
     chunked_text = chunk_text(cleaned_text, 200)
+
+    model_name = 'google/embeddinggemma-300m'
+    embeddings = embed(model_name, batch_size=128, chunks=chunked_text)
+    print(f'embeddings for {len(embeddings)} done')
+    # print(embeddings.shape)
+    save_embeddings(embeddings)
 
 run()

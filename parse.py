@@ -10,6 +10,7 @@ from langchain_huggingface.embeddings import HuggingFaceEmbeddings
 # login(token=os.environ.get('hf_token'))
 import numpy as np
 import pandas as pd
+import faiss
 
 
 def read_pdf(filepath):
@@ -76,6 +77,34 @@ def save_embeddings(embeddings):
     df.to_csv('embeddings.csv')
     print('Succesfully saved embeddings')
 
+def load_embeddings():
+
+    embeddings = np.array(pd.read_csv('embeddings.csv'))
+    # print(embeddings, embeddings.shape)
+    return embeddings
+
+def indexing(dimensions, embeddings):
+
+    index = faiss.IndexFlatL2(dimensions)
+    matrix =  np.array([embedding.flatten() for embedding in embeddings]).astype('float32')
+    print(matrix.shape)
+    index.add(matrix)
+    print(f'indexed {index.ntotal}')
+    return index
+
+def test_query(query, chunked_text):
+
+    embeddings = HuggingFaceEmbeddings(model_name = 'google/embeddinggemma-300m')
+    query_embedding = embeddings.embed_query(test)
+    query_embedding = np.array(query_embedding).reshape(1, -1).astype('float32')
+    k = 5  # Number of closest documents to retrieve
+    distances, indices = index.search(query_embedding, k)
+
+    # Retrieve and print the most similar chunks
+    print("Top similar document chunks:")
+    for idx in indices[0]:
+        print(chunked_text[idx]+'\n')
+
 
 
 def run():
@@ -89,6 +118,14 @@ def run():
     embeddings = embed(model_name, batch_size=128, chunks=chunked_text)
     print(f'embeddings for {len(embeddings)} done')
     # print(embeddings.shape)
-    save_embeddings(embeddings)
+    # save_embeddings(embeddings)
+
+    # embeddings = load_embeddings()
+    index = indexing(768, embeddings)
+
+    query = 'What is tha hair color of Rias?'
+    test_query(query, chunked_text)
+
+    
 
 run()

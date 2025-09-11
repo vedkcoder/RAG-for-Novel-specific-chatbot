@@ -92,10 +92,10 @@ def indexing(dimensions, embeddings):
     print(f'indexed {index.ntotal}')
     return index
 
-def test_query(query, chunked_text):
+def test_query(query, chunked_text, index):
 
     embeddings = HuggingFaceEmbeddings(model_name = 'google/embeddinggemma-300m')
-    query_embedding = embeddings.embed_query(test)
+    query_embedding = embeddings.embed_query(query)
     query_embedding = np.array(query_embedding).reshape(1, -1).astype('float32')
     k = 5  # Number of closest documents to retrieve
     distances, indices = index.search(query_embedding, k)
@@ -124,7 +124,7 @@ def run():
     index = indexing(768, embeddings)
 
     query = 'What is tha hair color of Rias?'
-    test_query(query, chunked_text)
+    test_query(query, chunked_text, index)
 
     
 

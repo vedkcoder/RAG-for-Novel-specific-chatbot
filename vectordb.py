@@ -143,7 +143,7 @@ def generate_vectordb():
     index = indexing(embeddings.shape[1], embeddings)
     save_index(index)
 
-    # query = 'What is tha hair color of Rias?'
+    # query = ''
     # test_query(query, chunked_text, index)
 
 generate_vectordb()

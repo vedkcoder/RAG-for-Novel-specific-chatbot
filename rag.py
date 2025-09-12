@@ -66,7 +66,7 @@ def generate_response(query, context_docs):
 
 if __name__ == "__main__":
 
-    query='the vanishing dragon'
+    query=''
     context = retrieve(query)
     print(context)
     response = generate_response(query, context_docs=context)

@@ -92,6 +92,11 @@ def indexing(dimensions, embeddings):
     print(f'indexed {index.ntotal}')
     return index
 
+def save_index(index):
+
+    faiss.write_index(index, 'index.index')
+    print('wrote indices to file')
+
 def test_query(query, chunked_text, index):
 
     embeddings = HuggingFaceEmbeddings(model_name = 'google/embeddinggemma-300m')
@@ -122,9 +127,10 @@ def run():
 
     # embeddings = load_embeddings()
     index = indexing(768, embeddings)
+    save_index(index)
 
-    query = 'What is tha hair color of Rias?'
-    test_query(query, chunked_text, index)
+    # query = 'What is tha hair color of Rias?'
+    # test_query(query, chunked_text, index)
 
     
 

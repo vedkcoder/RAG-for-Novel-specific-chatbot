@@ -79,7 +79,8 @@ def save_embeddings(embeddings):
 
 def load_embeddings():
 
-    embeddings = np.array(pd.read_csv('embeddings.csv'))
+    embeddings = pd.read_csv('embeddings.csv')
+    embeddings = np.array(embeddings.iloc[:, 1:].values)
     # print(embeddings, embeddings.shape)
     return embeddings
 
@@ -89,13 +90,22 @@ def indexing(dimensions, embeddings):
     matrix =  np.array([embedding.flatten() for embedding in embeddings]).astype('float32')
     print(matrix.shape)
     index.add(matrix)
-    print(f'indexed {index.ntotal}')
+    # print(f'indexed {index.ntotal}')
     return index
 
 def save_index(index):
-
-    faiss.write_index(index, 'index.index')
+    
+    faiss.write_index(index, 'index.idx')
     print('wrote indices to file')
+
+def save_chunks(chunked_text, chunk_filename):
+
+    chunked_text = "\n".join(chunked_text)
+    with open(chunk_filename, 'w') as file:
+        file.write(chunked_text)
+        file.close()
+
+    
 
 def test_query(query, chunked_text, index):
 
@@ -112,26 +122,28 @@ def test_query(query, chunked_text, index):
 
 
 
-def run():
+def generate_vectordb():
 
     filepath = "G:/coding stuff/Personal Projects/Agentic Chatbot/NovelData/"
     text = read_pdf(filepath)
     cleaned_text = clean_text(text)
     chunked_text = chunk_text(cleaned_text, 200)
 
+    # chunk_filename = 'chunked_text.txt'
+
+    # save_chunks(chunked_text, chunk_filename)
+
     model_name = 'google/embeddinggemma-300m'
-    embeddings = embed(model_name, batch_size=128, chunks=chunked_text)
+    embeddings = embed(model_name, batch_size=32, chunks=chunked_text)
     print(f'embeddings for {len(embeddings)} done')
-    # print(embeddings.shape)
-    # save_embeddings(embeddings)
+    print(embeddings.shape)
+    save_embeddings(embeddings)
 
     # embeddings = load_embeddings()
-    index = indexing(768, embeddings)
+    index = indexing(embeddings.shape[1], embeddings)
     save_index(index)
 
     # query = 'What is tha hair color of Rias?'
     # test_query(query, chunked_text, index)
 
-    
-
-run()
+generate_vectordb()

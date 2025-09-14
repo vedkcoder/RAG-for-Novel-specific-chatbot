@@ -31,7 +31,6 @@ def clean_text(text):
     text = [re.sub(r'\\s+', ' ', page) for page in text]
     text = [page.strip() for page in text]  
     text = [page for page in text if len(page) > 100]
-    text = [re.sub(r'[0-9]+ \| H i g h  S c h o o l  D x D  V o l u m e  [0-9]+','', page) for page in text]
 
     text = [char for page in text for char in page]
     text = ''.join(text)

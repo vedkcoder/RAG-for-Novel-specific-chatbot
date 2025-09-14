@@ -7,11 +7,8 @@ from langchain_core.messages import HumanMessage, SystemMessage
 def get_query_embedding(query):
 
     embeddings = HuggingFaceEmbeddings(model_name = 'google/embeddinggemma-300m')
-    # outputs = embeddings.embed_query(query)
-    # outputs = np.array(embeddings).reshape(1, -1).astype('float32')
     query_embedding = embeddings.embed_query(query)
     query_embedding = np.array(query_embedding).reshape(1, -1).astype('float32')
-    # print(query_embedding)
     return query_embedding
 
 def read_chunks(filename):
@@ -34,7 +31,6 @@ def load_index(filepath):
 def retrieve_documents(query, index, k, chunks):
 
     embedding = get_query_embedding(query)
-    # print(embedding)
     distances, indices = index.search(embedding, k)
     context_docs = [chunks[idx] for idx in indices[0]]
     return context_docs
